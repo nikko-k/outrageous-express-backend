@@ -1,6 +1,7 @@
 const fs = require("fs");
 const helmet = require ('helmet');
 const multer = require('multer');
+const bcrypt = require('bcrypt');
 
 const express = require('express');
 const app = express();
@@ -10,6 +11,7 @@ var port = process.env.PORT || 1300;
 
 app.listen(port,()=> console.log("Listening on port "+port)); //Starting the HTTP listen server
 app.use(helmet()); // Adding Helmet middleware (security)
+app.use(express.json());
 
 // Add headers
 app.use(function (req, res, next) {
@@ -18,7 +20,7 @@ app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 
     // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
 
     // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
@@ -55,3 +57,27 @@ app.post('/upload',upload.single('picture'),(req,res)=>{
     .send("Should be okay, probably isn't")
     .end();
 })
+
+app.post('/signin',(req,res)=>{
+
+
+    bcrypt.hash(req.body.password,3)
+    .then((encrypted,err)=>{
+    
+    res
+    .status(200)
+    .send(encrypted);})
+
+    .catch((reason)=>
+    console.log(reason));
+})
+
+
+app.post('/comparepass',(req,res)=>
+{
+    bcrypt.compare(req.body.password,"$2b$04$LhtrumiuxPX9byHCZCK6.en562IC94dbKmDIgWDzjwa8Q6z/eDj72",(err,ifSame)=>{
+       res
+       .send(ifSame);
+    })
+}
+)
