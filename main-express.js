@@ -1,6 +1,8 @@
+require('dotenv').config();
 const fs = require("fs");
 const helmet = require ('helmet');
 const multer = require('multer');
+const path = require('path');
 
 const express = require('express');
 const app = express();
@@ -36,7 +38,7 @@ const DiskStorage = multer.diskStorage({
     destination:'./public/images/',
     filename: (req,file,cb)=>
     {
-        cb(null,Date.now().toString()+"-"+file.originalname+".jpg");
+        cb(null,Date.now().toString()+"-"+file.originalname);
     }
 })
 
