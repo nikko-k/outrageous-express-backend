@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  outrageousexpressbackend:
+    image: outrageousexpressbackend
+    build:
+      context: .
+      dockerfile: Dockerfile
