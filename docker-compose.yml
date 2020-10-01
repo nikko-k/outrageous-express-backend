@@ -7,6 +7,7 @@ services:
     image: 'mongo:latest'
     build: ./mongo
     volumes:
+      - ./mongo:/docker-entrypoint-initdb.d/mongo:ro
       - mongodbdata:/data/db
     ports:
       - '27017:27017'

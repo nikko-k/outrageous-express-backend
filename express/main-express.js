@@ -19,6 +19,7 @@ mongoose.connect(dbString, { useNewUrlParser: true, useUnifiedTopology: true })
         console.error(reason);
     });
 var db = mongoose.connection;
+var galleryDb = mongoose.connection
 
 db.useDb("outrageous-login");
 
@@ -26,9 +27,9 @@ db.useDb("outrageous-login");
 
 app.listen(port, () => console.log("Listening on port " + port)); //Starting the HTTP listen server
 app.use(helmet()); // Adding Helmet middleware (security)
-app.use(express.json());
+app.use(express.json()); //Adding json handling
 
-// Add headers
+// Add headers (allows non https connections)
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
@@ -38,7 +39,7 @@ app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
 
     // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,Authorization');
 
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
@@ -48,23 +49,44 @@ app.use(function (req, res, next) {
     next();
 });
 
-
+//Picture uploads handling
 const DiskStorage = multer.diskStorage({
-    destination: './public/images/',
+    destination: './public/gallery/',
     filename: (req, file, cb) => {
         cb(null, Date.now().toString() + "-" + file.originalname);
     }
 })
-
 const upload = multer({ storage: DiskStorage });
+
+//Authorization middleware
+authorize = (req,res,next)=>{
+if(req.headers.Authorization!==undefined)
+{
+    token = req.headers.Authorization.split(' ')[1];
+    jwt.verify(token,process.env.JWT_SECRET)
+    .then((value)=>
+    {
+        req.username=value.username;
+    },
+    (reason)=>
+    {
+        res
+        .status(401)
+        .send(reason);
+    });
+}
+else{
+    res.status(401);
+}
+}
+
 
 app.get('/', (req, res) => res.send("Hello"));
 
-app.get('/uploadsfilenames', (res, req) => {
-    console.log(fs.readdir('.public/images/'));
-})
+app.use('/gallery',express.static('public/gallery'));
 
-app.post('/upload', upload.single('picture'), (req, res) => {
+app.post('/upload',authorize ,upload.single('picture'), (req, res) => {
+
     res
         .status(200)
         .contentType("text/plain")
@@ -124,16 +146,21 @@ app.post('/signin', (req, res) => {
                         .status(200)
                         .send({
                             status: "Success",
-                            token: jwt.sign({ value }, process.env.JWT_SECRET)
+                            token: jwt.sign({ value }, process.env.JWT_SECRET),
+                            username: req.body.username,
+
                         })
+                        .end();
                 }
                 else {
                     res
+                        .status(401)
                         .send({
                             status: "fail",
                             message: "Wrong password!",
                             error: err
                         })
+                        .end();
                 }
             })
         })
@@ -154,8 +181,3 @@ app.get('/allusers', (req, res) => {
             .send(value);
         })
     });
-
-app.delete('/allusers', (req, res) => {
-    mongooseschemas.User.deleteMany({},(err)=>{
-    console.log(err);})
-})

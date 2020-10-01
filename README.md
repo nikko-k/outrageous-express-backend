@@ -5,6 +5,6 @@
 1. "docker volume mongodbdata" за да създаде volume
 2. "docker cp mongodbdata:/data/db ./mongo" за да копне данните от volume-а в папката
 
-и съответно обратното: "docker cp "./db_backup" mongo_database:/data/db"
+и съответно обратното: "docker cp "./mongo" mongodbdata:/data/db"
 
 Цялата тая гимнастика е заради проблем на mongo с windows и мак. На линукс става доста по-лесно.
