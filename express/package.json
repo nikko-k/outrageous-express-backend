@@ -4,13 +4,15 @@
   "description": "outrageous backend",
   "main": "main-express.js",
   "dependencies": {
+    "@supercharge/strings": "^1.12.0",
     "axios": "^0.20.0",
     "bcrypt": "^5.0.0",
     "express": "^4.17.1",
     "helmet": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.5",
-    "multer": "^1.4.2"
+    "multer": "^1.4.2",
+    "nodemailer": "^6.4.13"
   },
   "nodemonConfig": {
     "env": {
